@@ -11,11 +11,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 :root{--neon-orange:#ff6a1a;--neon-pink:#ff2d7b;--neon-blue:#00d4ff;--bg:#050a18;}
-html,body{height:100%;overflow:hidden;}
-body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#fff;overflow:hidden;}
+html,body{height:100%;}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#fff;-webkit-font-smoothing:antialiased;}
 .grid-overlay{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);background-size:40px 40px;mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%);}
-.app{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;max-width:480px;margin:0 auto;}
-.topbar{padding:12px 16px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.app{position:relative;z-index:1;max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;}
+.topbar{padding:12px 16px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:10;background:rgba(5,10,24,.95);backdrop-filter:blur(12px);}
 .logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:3px;color:var(--neon-orange);text-shadow:0 0 8px rgba(255,106,26,.4);}
 .logo-sub{font-size:10px;color:rgba(255,255,255,.25);font-weight:500;letter-spacing:1px;margin-top:1px;}
 .sync-badge{font-size:9px;margin-top:2px;font-weight:500;}
@@ -23,7 +23,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#fff;overf
 .top-btns{display:flex;gap:6px;}
 .top-btn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.4);font-size:16px;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
 .top-btn:active{background:rgba(255,106,26,.15);border-color:rgba(255,106,26,.3);}
-.days{display:flex;gap:3px;padding:4px 10px 8px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;}
+.days{display:flex;gap:3px;padding:4px 10px 8px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;position:sticky;top:52px;z-index:9;background:rgba(5,10,24,.95);backdrop-filter:blur(12px);}
 .days::-webkit-scrollbar{display:none;}
 .day-tab{flex:1;min-width:48px;padding:6px 2px;text-align:center;cursor:pointer;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:10px;font-family:inherit;color:rgba(255,255,255,.25);transition:all .25s;position:relative;overflow:hidden;}
 .day-tab::before{content:'';position:absolute;inset:0;border-radius:10px;background:linear-gradient(135deg,var(--neon-orange),var(--neon-pink));opacity:0;transition:opacity .25s;}
@@ -35,7 +35,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#fff;overf
 .day-tab .dt-d{display:block;font-size:14px;font-weight:900;font-family:'Orbitron',monospace;position:relative;z-index:1;margin-top:1px;}
 .day-tab .dt-cnt{display:block;font-size:8px;color:var(--neon-orange);opacity:.7;position:relative;z-index:1;margin-top:2px;}
 .day-tab.memo-tab .dt-cnt{color:var(--neon-blue);}
-.map-area{position:relative;flex-shrink:0;height:220px;overflow:hidden;}
+.map-area{position:relative;flex-shrink:0;height:220px;overflow:hidden;touch-action:none;}
 .map-svg-wrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:0 10px;}
 .map-svg{width:100%;max-height:100%;overflow:visible;}
 .island-fill{fill:rgba(0,212,255,.03);}.island-stroke{fill:none;stroke:var(--neon-blue);stroke-width:1.8;filter:url(#neonGlow);}.island-stroke-inner{fill:none;stroke:rgba(0,212,255,.12);stroke-width:.5;}
@@ -46,13 +46,9 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#fff;overf
 .city-label{fill:rgba(0,212,255,.25);font-size:7px;font-weight:700;font-family:'Noto Sans KR';letter-spacing:1px;}.city-dot{fill:var(--neon-blue);opacity:.25;}
 .landmark{fill:rgba(0,255,136,.15);font-size:6px;font-family:'Noto Sans KR';}.stop-name-label{fill:rgba(255,255,255,.35);font-size:6.5px;font-weight:600;font-family:'Noto Sans KR';}
 
-.panel{flex:1;min-height:0;overflow-y:auto;background:linear-gradient(180deg,rgba(8,16,32,.97),rgba(5,10,24,.99));border-top:1px solid rgba(0,212,255,.08);padding:10px 14px;padding-bottom:max(16px,env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;position:relative;}
-.panel::-webkit-scrollbar{width:4px;}
-.panel::-webkit-scrollbar-track{background:transparent;}
-.panel::-webkit-scrollbar-thumb{background:rgba(255,106,26,.3);border-radius:4px;}
-.panel-fade{position:sticky;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,rgba(5,10,24,.95));pointer-events:none;margin:0 -14px;z-index:3;}
+.panel{background:linear-gradient(180deg,rgba(8,16,32,.97),rgba(5,10,24,.99));border-top:1px solid rgba(0,212,255,.08);padding:10px 14px;padding-bottom:max(60px,env(safe-area-inset-bottom));}
 .panel.editing{border-color:rgba(255,106,26,.35);}
-.panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;position:sticky;top:0;z-index:2;background:rgba(5,10,24,.95);padding:4px 0 6px;}
+.panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding:4px 0 6px;}
 .panel-title{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;color:var(--neon-orange);text-shadow:0 0 8px rgba(255,106,26,.3);letter-spacing:2px;}
 .panel-title.memo-title{color:var(--neon-blue);text-shadow:0 0 8px rgba(0,212,255,.3);}
 .panel-day{font-size:10px;color:rgba(255,255,255,.25);font-weight:500;}.panel-filled{font-size:9px;color:var(--neon-blue);font-family:'Orbitron',monospace;}
@@ -314,7 +310,7 @@ function App(){
         <div className={`panel ${editIdx!==null?"editing":""}`}>
           <div className="panel-header">
             <span className="panel-title">SCHEDULE</span>
-            <div style={{display:"flex",gap:8,alignItems:"center"}}><span className="panel-filled">{filledCount}개</span><span className="panel-day">{DAYS.find(d=>d.id===tab)?.date} · ↕ 스크롤</span></div>
+            <div style={{display:"flex",gap:8,alignItems:"center"}}><span className="panel-filled">{filledCount}개</span><span className="panel-day">{DAYS.find(d=>d.id===tab)?.date}</span></div>
           </div>
           {editIdx!==null?(
             <div className="edit-wrap">
