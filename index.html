@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#050a18">
 <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;제주여행&quot;,&quot;short_name&quot;:&quot;제주&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#050a18&quot;,&quot;theme_color&quot;:&quot;#050a18&quot;}">
-<title>🍊 스테디와 함께하는 제주여행 🐶 </title>
+<title>🍊 JEJU TRIP</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -46,7 +46,11 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#fff;overf
 .city-label{fill:rgba(0,212,255,.25);font-size:7px;font-weight:700;font-family:'Noto Sans KR';letter-spacing:1px;}.city-dot{fill:var(--neon-blue);opacity:.25;}
 .landmark{fill:rgba(0,255,136,.15);font-size:6px;font-family:'Noto Sans KR';}.stop-name-label{fill:rgba(255,255,255,.35);font-size:6.5px;font-weight:600;font-family:'Noto Sans KR';}
 
-.panel{flex:1;min-height:0;overflow-y:auto;background:linear-gradient(180deg,rgba(8,16,32,.97),rgba(5,10,24,.99));border-top:1px solid rgba(0,212,255,.08);padding:10px 14px;padding-bottom:max(16px,env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;}
+.panel{flex:1;min-height:0;overflow-y:auto;background:linear-gradient(180deg,rgba(8,16,32,.97),rgba(5,10,24,.99));border-top:1px solid rgba(0,212,255,.08);padding:10px 14px;padding-bottom:max(16px,env(safe-area-inset-bottom));-webkit-overflow-scrolling:touch;position:relative;}
+.panel::-webkit-scrollbar{width:4px;}
+.panel::-webkit-scrollbar-track{background:transparent;}
+.panel::-webkit-scrollbar-thumb{background:rgba(255,106,26,.3);border-radius:4px;}
+.panel-fade{position:sticky;bottom:0;left:0;right:0;height:40px;background:linear-gradient(transparent,rgba(5,10,24,.95));pointer-events:none;margin:0 -14px;z-index:3;}
 .panel.editing{border-color:rgba(255,106,26,.35);}
 .panel-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;position:sticky;top:0;z-index:2;background:rgba(5,10,24,.95);padding:4px 0 6px;}
 .panel-title{font-family:'Orbitron',monospace;font-size:10px;font-weight:700;color:var(--neon-orange);text-shadow:0 0 8px rgba(255,106,26,.3);letter-spacing:2px;}
@@ -310,7 +314,7 @@ function App(){
         <div className={`panel ${editIdx!==null?"editing":""}`}>
           <div className="panel-header">
             <span className="panel-title">SCHEDULE</span>
-            <div style={{display:"flex",gap:8,alignItems:"center"}}><span className="panel-filled">{filledCount}개</span><span className="panel-day">{DAYS.find(d=>d.id===tab)?.date}</span></div>
+            <div style={{display:"flex",gap:8,alignItems:"center"}}><span className="panel-filled">{filledCount}개</span><span className="panel-day">{DAYS.find(d=>d.id===tab)?.date} · ↕ 스크롤</span></div>
           </div>
           {editIdx!==null?(
             <div className="edit-wrap">
