@@ -7,6 +7,7 @@
 <meta name="theme-color" content="#050a18">
 <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;제주여행&quot;,&quot;short_name&quot;:&quot;제주&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#050a18&quot;,&quot;theme_color&quot;:&quot;#050a18&quot;}">
 <title>🍊 JEJU TRIP</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -15,36 +16,34 @@ html,body{height:100%;}
 body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#fff;-webkit-font-smoothing:antialiased;}
 .grid-overlay{position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(0,212,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.03) 1px,transparent 1px);background-size:40px 40px;mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%);-webkit-mask-image:radial-gradient(ellipse at center,black 30%,transparent 75%);}
 .app{position:relative;z-index:1;max-width:480px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;}
-.topbar{padding:12px 16px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:10;background:rgba(5,10,24,.95);backdrop-filter:blur(12px);}
+.topbar{padding:12px 16px 6px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;position:sticky;top:0;z-index:20;background:rgba(5,10,24,.95);backdrop-filter:blur(12px);}
 .logo{font-family:'Orbitron',monospace;font-size:14px;font-weight:900;letter-spacing:3px;color:var(--neon-orange);text-shadow:0 0 8px rgba(255,106,26,.4);}
 .logo-sub{font-size:10px;color:rgba(255,255,255,.25);font-weight:500;letter-spacing:1px;margin-top:1px;}
-.sync-badge{font-size:9px;margin-top:2px;font-weight:500;}
-.sync-badge.on{color:rgba(0,255,136,.5);}.sync-badge.off{color:rgba(255,106,26,.4);}
+.sync-badge{font-size:9px;margin-top:2px;font-weight:500;}.sync-badge.on{color:rgba(0,255,136,.5);}.sync-badge.off{color:rgba(255,106,26,.4);}
 .top-btns{display:flex;gap:6px;}
 .top-btn{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);color:rgba(255,255,255,.4);font-size:16px;width:34px;height:34px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
-.top-btn:active{background:rgba(255,106,26,.15);border-color:rgba(255,106,26,.3);}
-.days{display:flex;gap:3px;padding:4px 10px 8px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;position:sticky;top:52px;z-index:9;background:rgba(5,10,24,.95);backdrop-filter:blur(12px);}
+.top-btn:active{background:rgba(255,106,26,.15);}
+.days{display:flex;gap:3px;padding:4px 10px 8px;flex-shrink:0;overflow-x:auto;scrollbar-width:none;position:sticky;top:52px;z-index:19;background:rgba(5,10,24,.95);backdrop-filter:blur(12px);}
 .days::-webkit-scrollbar{display:none;}
 .day-tab{flex:1;min-width:48px;padding:6px 2px;text-align:center;cursor:pointer;background:rgba(255,255,255,.02);border:1px solid rgba(255,255,255,.05);border-radius:10px;font-family:inherit;color:rgba(255,255,255,.25);transition:all .25s;position:relative;overflow:hidden;}
 .day-tab::before{content:'';position:absolute;inset:0;border-radius:10px;background:linear-gradient(135deg,var(--neon-orange),var(--neon-pink));opacity:0;transition:opacity .25s;}
 .day-tab.active{border-color:rgba(255,106,26,.5);color:#fff;box-shadow:0 0 15px rgba(255,106,26,.2),inset 0 0 15px rgba(255,106,26,.05);}
 .day-tab.active::before{opacity:.12;}
-.day-tab.memo-tab.active{border-color:rgba(0,212,255,.5);box-shadow:0 0 15px rgba(0,212,255,.2),inset 0 0 15px rgba(0,212,255,.05);}
+.day-tab.memo-tab.active{border-color:rgba(0,212,255,.5);box-shadow:0 0 15px rgba(0,212,255,.2);}
 .day-tab.memo-tab.active::before{background:linear-gradient(135deg,var(--neon-blue),#9f7aea);opacity:.12;}
 .day-tab .dt-l{display:block;font-size:8px;font-weight:700;letter-spacing:1px;opacity:.5;position:relative;z-index:1;}
 .day-tab .dt-d{display:block;font-size:14px;font-weight:900;font-family:'Orbitron',monospace;position:relative;z-index:1;margin-top:1px;}
 .day-tab .dt-cnt{display:block;font-size:8px;color:var(--neon-orange);opacity:.7;position:relative;z-index:1;margin-top:2px;}
 .day-tab.memo-tab .dt-cnt{color:var(--neon-blue);}
-.map-area{position:relative;flex-shrink:0;height:220px;overflow:hidden;touch-action:none;}
-.map-svg-wrap{width:100%;height:100%;display:flex;align-items:center;justify-content:center;padding:0 10px;}
-.map-svg{width:100%;max-height:100%;overflow:visible;}
-.island-fill{fill:rgba(0,212,255,.03);}.island-stroke{fill:none;stroke:var(--neon-blue);stroke-width:1.8;filter:url(#neonGlow);}.island-stroke-inner{fill:none;stroke:rgba(0,212,255,.12);stroke-width:.5;}
-.route-line{fill:none;stroke:var(--neon-orange);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;filter:url(#routeGlow);}
-.route-line-bg{fill:none;stroke:rgba(255,106,26,.06);stroke-width:6;stroke-linecap:round;stroke-linejoin:round;}
-.stop-g{cursor:pointer;}.stop-ring{fill:none;stroke:var(--neon-orange);stroke-width:1.5;filter:url(#markerGlow);}.stop-fill{fill:#050a18;}.stop-num{fill:var(--neon-orange);font-family:'Orbitron',monospace;font-size:10px;font-weight:700;text-anchor:middle;dominant-baseline:central;}
-.stop-g.active .stop-ring{stroke:var(--neon-pink);}.stop-g.active .stop-num{fill:var(--neon-pink);}.stop-g.active .stop-fill{fill:rgba(255,45,123,.08);}
-.city-label{fill:rgba(0,212,255,.25);font-size:7px;font-weight:700;font-family:'Noto Sans KR';letter-spacing:1px;}.city-dot{fill:var(--neon-blue);opacity:.25;}
-.landmark{fill:rgba(0,255,136,.15);font-size:6px;font-family:'Noto Sans KR';}.stop-name-label{fill:rgba(255,255,255,.35);font-size:6.5px;font-weight:600;font-family:'Noto Sans KR';}
+
+/* Leaflet Map */
+.map-area{position:relative;flex-shrink:0;height:250px;z-index:1;}
+#leafmap{width:100%;height:100%;}
+.leaflet-container{background:var(--bg) !important;}
+.leaflet-control-zoom,.leaflet-control-attribution{display:none !important;}
+.neon-marker{width:28px;height:28px;border-radius:50%;border:2px solid var(--neon-orange);background:rgba(5,10,24,.85);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:10px;font-weight:700;color:var(--neon-orange);box-shadow:0 0 10px rgba(255,106,26,.5),0 0 20px rgba(255,106,26,.2);cursor:pointer;transition:all .2s;}
+.neon-marker.active{border-color:var(--neon-pink);color:var(--neon-pink);box-shadow:0 0 10px rgba(255,45,123,.5),0 0 20px rgba(255,45,123,.2);}
+.neon-marker-label{position:absolute;top:32px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:9px;font-weight:700;color:rgba(255,255,255,.6);text-shadow:0 0 4px rgba(0,0,0,.8);pointer-events:none;}
 
 .panel{background:linear-gradient(180deg,rgba(8,16,32,.97),rgba(5,10,24,.99));border-top:1px solid rgba(0,212,255,.08);padding:10px 14px;padding-bottom:max(60px,env(safe-area-inset-bottom));}
 .panel.editing{border-color:rgba(255,106,26,.35);}
@@ -67,7 +66,6 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#fff;-webk
 .sr-copy{background:var(--neon-orange);color:#000;border:none;border-radius:4px;padding:3px 10px;font-size:10px;font-weight:700;cursor:pointer;font-family:inherit;flex-shrink:0;box-shadow:0 0 6px rgba(255,106,26,.25);}
 .sr-copy:active{transform:scale(.95);}
 .sr-note{font-size:10px;color:rgba(255,255,255,.18);margin-top:3px;}.sr-x{background:none;border:none;color:rgba(255,255,255,.12);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;}
-
 .edit-wrap{padding:2px 0;}.edit-head{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
 .edit-num{width:28px;height:28px;border-radius:50%;border:1.5px solid var(--neon-orange);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:12px;font-weight:700;color:var(--neon-orange);box-shadow:0 0 8px rgba(255,106,26,.2);}
 .edit-time{font-size:11px;color:rgba(255,255,255,.3);font-family:'Orbitron',monospace;letter-spacing:1px;}
@@ -75,7 +73,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#fff;-webk
 .edit-wrap input:focus{border-color:rgba(255,106,26,.5);box-shadow:0 0 10px rgba(255,106,26,.08);}
 .edit-wrap input::placeholder{color:rgba(255,255,255,.12);}
 .loc-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;}
-.loc-chip{padding:3px 9px;border-radius:14px;font-size:10px;font-weight:600;cursor:pointer;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.12);color:rgba(0,212,255,.4);font-family:inherit;transition:all .15s;}
+.loc-chip{padding:3px 9px;border-radius:14px;font-size:10px;font-weight:600;cursor:pointer;background:rgba(0,212,255,.05);border:1px solid rgba(0,212,255,.12);color:rgba(0,212,255,.4);font-family:inherit;}
 .loc-chip.sel{background:rgba(0,212,255,.12);border-color:rgba(0,212,255,.45);color:var(--neon-blue);box-shadow:0 0 6px rgba(0,212,255,.15);}
 .loc-chip:active{transform:scale(.95);}
 .edit-addr-row{display:flex;align-items:center;gap:6px;background:rgba(0,0,0,.25);border:1px solid rgba(255,106,26,.2);border-radius:8px;padding:0 12px;margin-bottom:6px;}
@@ -85,35 +83,27 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#fff;-webk
 .btn-sv{background:var(--neon-orange);color:#000;border:none;border-radius:8px;padding:9px 24px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 0 12px rgba(255,106,26,.25);}
 .btn-sv:active{transform:scale(.95);}
 .btn-cn{background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);border:none;border-radius:8px;padding:9px 16px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;}
-
-/* Memo from edit */
-.memo-pick{margin-bottom:10px;}
-.memo-pick-title{font-size:10px;color:var(--neon-blue);font-weight:700;margin-bottom:6px;letter-spacing:1px;}
+.memo-pick{margin-bottom:10px;}.memo-pick-title{font-size:10px;color:var(--neon-blue);font-weight:700;margin-bottom:6px;letter-spacing:1px;}
 .memo-pick-list{display:flex;gap:4px;flex-wrap:wrap;}
-.memo-pick-chip{padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.15);color:rgba(0,212,255,.6);font-family:inherit;transition:all .15s;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.memo-pick-chip:active{background:rgba(0,212,255,.15);border-color:rgba(0,212,255,.4);color:var(--neon-blue);}
-
-/* Memo tab */
-.memo-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:12px;margin-bottom:6px;cursor:pointer;transition:all .15s;}
+.memo-pick-chip{padding:5px 10px;border-radius:8px;font-size:11px;font-weight:600;cursor:pointer;background:rgba(0,212,255,.06);border:1px solid rgba(0,212,255,.15);color:rgba(0,212,255,.6);font-family:inherit;}
+.memo-pick-chip:active{background:rgba(0,212,255,.15);color:var(--neon-blue);}
+.memo-card{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.05);border-radius:10px;padding:12px;margin-bottom:6px;cursor:pointer;}
 .memo-card:active{background:rgba(0,212,255,.05);border-color:rgba(0,212,255,.2);}
-.mc-top{display:flex;justify-content:space-between;align-items:center;}
-.mc-act{font-size:14px;font-weight:700;color:rgba(255,255,255,.85);}
+.mc-top{display:flex;justify-content:space-between;align-items:center;}.mc-act{font-size:14px;font-weight:700;color:rgba(255,255,255,.85);}
 .mc-loc{font-size:10px;color:var(--neon-blue);margin-top:3px;opacity:.6;}
 .mc-addr{display:flex;align-items:center;gap:5px;margin-top:5px;background:rgba(0,0,0,.25);border-radius:6px;padding:5px 8px;border:1px solid rgba(255,255,255,.04);}
 .mc-note{font-size:10px;color:rgba(255,255,255,.18);margin-top:3px;}
 .mc-x{background:none;border:none;color:rgba(255,255,255,.12);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;}
 .add-memo-btn{width:100%;padding:14px;border:1.5px dashed rgba(0,212,255,.15);border-radius:10px;background:none;color:rgba(0,212,255,.3);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:4px;}
 .add-memo-btn:active{border-color:rgba(0,212,255,.3);background:rgba(0,212,255,.04);}
-.edit-wrap.memo-edit input{border-color:rgba(0,212,255,.2);}
-.edit-wrap.memo-edit input:focus{border-color:rgba(0,212,255,.5);box-shadow:0 0 10px rgba(0,212,255,.08);}
+.edit-wrap.memo-edit input{border-color:rgba(0,212,255,.2);}.edit-wrap.memo-edit input:focus{border-color:rgba(0,212,255,.5);}
 .btn-sv.memo-sv{background:var(--neon-blue);}
-
 .toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:rgba(255,106,26,.95);color:#000;padding:8px 24px;border-radius:20px;font-size:12px;font-weight:700;z-index:100;box-shadow:0 0 20px rgba(255,106,26,.5);animation:toastIn .3s cubic-bezier(.175,.885,.32,1.275);}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-10px) scale(.9);}}
 .loading-screen{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
 .loading-ring{width:40px;height:40px;border:3px solid rgba(255,106,26,.15);border-top-color:var(--neon-orange);border-radius:50%;animation:spin .8s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
-.loading-text{font-family:'Orbitron',monospace;font-size:12px;color:var(--neon-orange);letter-spacing:3px;text-shadow:0 0 8px rgba(255,106,26,.3);}
+.loading-text{font-family:'Orbitron',monospace;font-size:12px;color:var(--neon-orange);letter-spacing:3px;}
 </style>
 </head>
 <body>
@@ -121,17 +111,18 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:#fff;-webk
 <div id="app"></div>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script>
-const FIREBASE_URL = "https://jeju-1886c-default-rtdb.firebaseio.com";
+const FIREBASE_URL="https://jeju-1886c-default-rtdb.firebaseio.com";
 let db=null,firebaseReady=false;
 try{if(!FIREBASE_URL.includes("여기에")){firebase.initializeApp({databaseURL:FIREBASE_URL});db=firebase.database();firebaseReady=true;}}catch(e){console.error(e);}
 </script>
 <script type="text/babel">
 const{useState,useEffect,useRef,useCallback}=React;
-const SK="jeju-2026-v5";
+const SK="jeju-2026-v6";
 const DAYS=[
   {id:1,tab:"02",date:"6/2 화",label:"DAY1"},
   {id:2,tab:"03",date:"6/3 수",label:"DAY2"},
@@ -139,18 +130,25 @@ const DAYS=[
   {id:4,tab:"05",date:"6/5 금",label:"DAY4"},
   {id:5,tab:"06",date:"6/6 토",label:"DAY5"},
 ];
-const MEMO_TAB={id:"memo",tab:"📋",label:"MEMO"};
 
+// Real lat/lng for Jeju locations
 const LOCS=[
-  {name:"제주공항",x:222,y:82},{name:"제주시",x:240,y:100},{name:"함덕",x:300,y:78},
-  {name:"애월",x:165,y:95},{name:"협재",x:120,y:120},{name:"한림",x:105,y:135},
-  {name:"중문",x:190,y:220},{name:"서귀포",x:250,y:230},{name:"성산",x:385,y:135},
-  {name:"우도",x:420,y:105},{name:"표선",x:350,y:190},{name:"완도항",x:240,y:15},
-  {name:"한라산",x:245,y:155},{name:"월정리",x:320,y:82},{name:"김녕",x:330,y:85},
-  {name:"조천",x:280,y:80},{name:"대정",x:110,y:200},{name:"모슬포",x:130,y:215},
+  {name:"제주공항",lat:33.5104,lng:126.4914},{name:"제주시",lat:33.5000,lng:126.5312},
+  {name:"함덕",lat:33.5433,lng:126.6694},{name:"애월",lat:33.4631,lng:126.3105},
+  {name:"협재",lat:33.3946,lng:126.2396},{name:"한림",lat:33.4141,lng:126.2651},
+  {name:"중문",lat:33.2497,lng:126.4122},{name:"서귀포",lat:33.2541,lng:126.5600},
+  {name:"성산",lat:33.4622,lng:126.9422},{name:"우도",lat:33.5036,lng:126.9514},
+  {name:"표선",lat:33.3447,lng:126.8258},{name:"완도항",lat:34.3106,lng:126.7550},
+  {name:"한라산",lat:33.3617,lng:126.5292},{name:"월정리",lat:33.5561,lng:126.7890},
+  {name:"김녕",lat:33.5583,lng:126.7650},{name:"조천",lat:33.5250,lng:126.6350},
+  {name:"대정",lat:33.2214,lng:126.2508},{name:"모슬포",lat:33.2139,lng:126.2550},
 ];
-const locMap={};LOCS.forEach(l=>{locMap[l.name]={x:l.x,y:l.y};});
-const defaultLoc=(i)=>{const p=[{x:240,y:100},{x:165,y:95},{x:300,y:78},{x:120,y:135},{x:190,y:220},{x:250,y:230},{x:385,y:135},{x:350,y:190}];return p[i%p.length];};
+const locMap={};LOCS.forEach(l=>{locMap[l.name]={lat:l.lat,lng:l.lng};});
+const defaultLocs=[
+  {lat:33.50,lng:126.53},{lat:33.46,lng:126.31},{lat:33.54,lng:126.67},
+  {lat:33.39,lng:126.24},{lat:33.25,lng:126.41},{lat:33.25,lng:126.56},
+  {lat:33.46,lng:126.94},{lat:33.34,lng:126.83},
+];
 
 const makeHours=()=>{const s=[];for(let h=7;h<=23;h++)s.push({t:`${String(h).padStart(2,"0")}:00`,a:"",n:"",d:"",loc:""});return s;};
 const makeStops=(id)=>{
@@ -160,49 +158,91 @@ const makeStops=(id)=>{
   return s;
 };
 const buildDef=()=>{const o={};DAYS.forEach(d=>{o[d.id]=makeStops(d.id)});o.memo=[];return o;};
-
-const saveData=async(data)=>{
-  try{localStorage.setItem(SK,JSON.stringify(data));}catch{}
-  if(firebaseReady&&db){try{await db.ref("/data").set(data);}catch(e){console.error(e);}}
-};
+const saveData=async(data)=>{try{localStorage.setItem(SK,JSON.stringify(data));}catch{};if(firebaseReady&&db){try{await db.ref("/data").set(data);}catch(e){console.error(e);}}};
 const loadLocal=()=>{try{const d=localStorage.getItem(SK);return d?JSON.parse(d):null;}catch{return null;}};
 
-const ISLAND="M160,100 C140,92 120,90 105,100 C88,112 78,128 82,148 C86,168 100,185 120,198 C140,210 165,220 190,228 C215,235 240,238 260,237 C280,236 300,232 320,224 C340,216 358,205 372,190 C386,175 396,158 400,140 C404,122 400,108 390,98 C378,86 362,80 342,78 C322,76 300,78 280,82 C260,86 240,88 220,88 C200,88 180,92 168,96 Z";
+// Leaflet Map Component
+function SatelliteMap({filledStops,activeMapIdx,onTapMapStop,day}){
+  const mapRef=useRef(null);
+  const mapInst=useRef(null);
+  const markersRef=useRef([]);
+  const lineRef=useRef(null);
 
-function NeonMap({filledStops,activeMapIdx,onTapMapStop,day}){
-  const getPos=(s,fi)=>{if(s.loc&&locMap[s.loc])return locMap[s.loc];for(const l of LOCS){if((s.a||"").includes(l.name))return{x:l.x,y:l.y};}return defaultLoc(fi);};
-  const positions=filledStops.map((s,i)=>getPos(s,i));
-  const routePath=positions.length>1?"M"+positions.map(p=>`${p.x},${p.y}`).join(" L "):"";
-  return(
-    <svg className="map-svg" viewBox="0 0 480 270" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="neonGlow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        <filter id="routeGlow"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        <filter id="markerGlow"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      </defs>
-      <path d={ISLAND} className="island-fill"/><path d={ISLAND} className="island-stroke"/><path d={ISLAND} className="island-stroke-inner"/>
-      <polygon points="225,165 245,128 265,165" fill="none" stroke="rgba(0,255,136,.1)" strokeWidth="1"/>
-      <text x="245" y="172" textAnchor="middle" className="landmark">한라산</text>
-      {LOCS.filter(l=>!["완도항","한라산"].includes(l.name)).map(l=>(<g key={l.name}><circle cx={l.x} cy={l.y} r="1.5" className="city-dot"/><text x={l.x} y={l.y-5} textAnchor="middle" className="city-label">{l.name}</text></g>))}
-      {routePath&&<><path d={routePath} className="route-line-bg"/><path d={routePath} className="route-line"/></>}
-      {positions.map((p,i)=>(<g key={`${day}-${i}`} className={`stop-g ${activeMapIdx===i?"active":""}`} onClick={()=>onTapMapStop(i)}>
-        <circle cx={p.x} cy={p.y} r="13" className="stop-ring"/><circle cx={p.x} cy={p.y} r="11" className="stop-fill"/>
-        <text x={p.x} y={p.y} className="stop-num">{i+1}</text>
-        <text x={p.x} y={p.y+20} textAnchor="middle" className="stop-name-label">{filledStops[i].a.replace(/[\p{Emoji_Presentation}]/gu,"").trim().slice(0,6)}</text>
-      </g>))}
-      {filledStops.length===0&&<text x="240" y="155" textAnchor="middle" fill="rgba(255,255,255,.1)" fontSize="11" fontWeight="600" fontFamily="Noto Sans KR">일정을 추가하면 경로가 나타나요</text>}
-    </svg>
-  );
+  const getPos=(s,i)=>{
+    if(s.loc&&locMap[s.loc])return locMap[s.loc];
+    for(const l of LOCS){if((s.a||"").includes(l.name))return{lat:l.lat,lng:l.lng};}
+    return defaultLocs[i%defaultLocs.length];
+  };
+
+  useEffect(()=>{
+    if(!mapRef.current||mapInst.current)return;
+    const map=L.map(mapRef.current,{
+      center:[33.38,126.55],zoom:10,zoomControl:false,attributionControl:false,
+      dragging:true,scrollWheelZoom:false,doubleClickZoom:false,touchZoom:true,
+    });
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{
+      maxZoom:18,
+    }).addTo(map);
+    mapInst.current=map;
+    return()=>{map.remove();mapInst.current=null;};
+  },[]);
+
+  useEffect(()=>{
+    const map=mapInst.current;
+    if(!map)return;
+    // Clear old
+    markersRef.current.forEach(m=>map.removeLayer(m));
+    markersRef.current=[];
+    if(lineRef.current){map.removeLayer(lineRef.current);lineRef.current=null;}
+
+    if(filledStops.length===0)return;
+
+    const positions=filledStops.map((s,i)=>getPos(s,i));
+    const latlngs=positions.map(p=>[p.lat,p.lng]);
+
+    // Route line
+    if(latlngs.length>1){
+      // Glow line (wider, transparent)
+      const glow=L.polyline(latlngs,{color:'#ff6a1a',weight:8,opacity:0.15,lineCap:'round',lineJoin:'round'}).addTo(map);
+      markersRef.current.push(glow);
+      // Main line
+      lineRef.current=L.polyline(latlngs,{color:'#ff6a1a',weight:3,opacity:0.9,lineCap:'round',lineJoin:'round',dashArray:'8,6'}).addTo(map);
+    }
+
+    // Markers
+    filledStops.forEach((s,i)=>{
+      const pos=positions[i];
+      const isActive=activeMapIdx===i;
+      const label=s.a.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}]/gu,"").trim().slice(0,6);
+      const icon=L.divIcon({
+        className:'',
+        html:`<div class="neon-marker ${isActive?'active':''}">${i+1}</div><div class="neon-marker-label">${label}</div>`,
+        iconSize:[28,28],iconAnchor:[14,14],
+      });
+      const marker=L.marker([pos.lat,pos.lng],{icon}).addTo(map);
+      marker.on('click',()=>onTapMapStop(i));
+      markersRef.current.push(marker);
+    });
+
+    // Fit bounds
+    if(latlngs.length>1){
+      map.fitBounds(latlngs,{padding:[30,30],maxZoom:12,animate:true});
+    }else if(latlngs.length===1){
+      map.setView(latlngs[0],11,{animate:true});
+    }
+  },[filledStops,activeMapIdx,day]);
+
+  return <div className="map-area"><div id="leafmap" ref={mapRef}/></div>;
 }
 
 function App(){
-  const[tab,setTab]=useState(1); // 1-5 or "memo"
+  const[tab,setTab]=useState(1);
   const[all,setAll]=useState(null);
   const[loading,setLoading]=useState(true);
   const[syncStatus,setSyncStatus]=useState(firebaseReady?"connecting":"local");
   const[activeIdx,setActiveIdx]=useState(null);
   const[editIdx,setEditIdx]=useState(null);
-  const[memoEditIdx,setMemoEditIdx]=useState(null); // null | index | "new"
+  const[memoEditIdx,setMemoEditIdx]=useState(null);
   const[dr,setDr]=useState({a:"",n:"",d:"",loc:""});
   const[toast,setToast]=useState(null);
   const tr=useRef(null);
@@ -214,25 +254,22 @@ function App(){
       const ref=db.ref("/data");
       ref.on("value",(snap)=>{
         const data=snap.val();
-        if(data){
-          if(!skipRef.current){setAll(data);try{localStorage.setItem(SK,JSON.stringify(data));}catch{}}
-          skipRef.current=false;
-        }else{const def=buildDef();setAll(def);ref.set(def);}
+        if(data){if(!skipRef.current){setAll(data);try{localStorage.setItem(SK,JSON.stringify(data));}catch{}}skipRef.current=false;}
+        else{const def=buildDef();setAll(def);ref.set(def);}
         setLoading(false);setSyncStatus("synced");
       },(err)=>{setAll(loadLocal()||buildDef());setLoading(false);setSyncStatus("error");});
       return()=>ref.off();
     }else{setAll(loadLocal()||buildDef());setLoading(false);}
   },[]);
 
-  const updateAll=useCallback((newData)=>{setAll(newData);skipRef.current=true;saveData(newData);},[]);
-
+  const updateAll=useCallback((nd)=>{setAll(nd);skipRef.current=true;saveData(nd);},[]);
   if(loading||!all)return(<div className="loading-screen"><div className="loading-ring"/><div className="loading-text">LOADING</div></div>);
 
   const isMemo=tab==="memo";
   const memo=all.memo||[];
   const slots=isMemo?[]:all[tab];
   const filledStops=isMemo?[]:slots.filter(s=>s.a);
-  const filledCount=isMemo?0:filledStops.length;
+  const filledCount=filledStops.length;
   const filledToSlotIdx=(fi)=>slots.findIndex((s,idx)=>s.a&&slots.slice(0,idx+1).filter(x=>x.a).length===fi+1);
   const onTapMapStop=(mi)=>{const si=filledToSlotIdx(mi);setActiveIdx(si);setTimeout(()=>{const el=document.getElementById(`slot-${si}`);if(el)el.scrollIntoView({behavior:"smooth",block:"center"});},50);};
 
@@ -243,47 +280,33 @@ function App(){
   const cpAddr=(addr,e)=>{e&&e.stopPropagation();navigator.clipboard.writeText(addr).then(()=>show("주소 복사됨! 📋")).catch(()=>{const t=document.createElement("textarea");t.value=addr;document.body.appendChild(t);t.select();document.execCommand("copy");document.body.removeChild(t);show("복사됨!");});};
   const reset=()=>{if(confirm("전체 초기화?")){updateAll(buildDef());show("초기화");setActiveIdx(null);setEditIdx(null);setMemoEditIdx(null);}};
   const activeMapIdx=activeIdx!==null&&slots[activeIdx]?.a?slots.slice(0,activeIdx+1).filter(s=>s.a).length-1:null;
-  const syncLabel={synced:"● 실시간 동기화",connecting:"○ 연결 중...",local:"○ 로컬 모드",error:"○ 연결 오류"}[syncStatus]||"";
 
-  // Memo CRUD
   const startMemoEdit=(i)=>{const m=memo[i];setMemoEditIdx(i);setDr({a:m.a,n:m.n||"",d:m.d||"",loc:m.loc||""});};
   const startMemoNew=()=>{setMemoEditIdx("new");setDr({a:"",n:"",d:"",loc:""});};
-  const saveMemo=()=>{const c={...all};const list=[...(c.memo||[])];
-    if(memoEditIdx==="new"){list.push({a:dr.a,n:dr.n,d:dr.d,loc:dr.loc});}
-    else{list[memoEditIdx]={...list[memoEditIdx],a:dr.a,n:dr.n,d:dr.d,loc:dr.loc};}
-    c.memo=list;updateAll(c);setMemoEditIdx(null);};
+  const saveMemo=()=>{const c={...all};const list=[...(c.memo||[])];if(memoEditIdx==="new"){list.push({a:dr.a,n:dr.n,d:dr.d,loc:dr.loc});}else{list[memoEditIdx]={...list[memoEditIdx],a:dr.a,n:dr.n,d:dr.d,loc:dr.loc};}c.memo=list;updateAll(c);setMemoEditIdx(null);};
   const delMemo=(i,e)=>{e&&e.stopPropagation();const c={...all};const list=[...(c.memo||[])];list.splice(i,1);c.memo=list;updateAll(c);setMemoEditIdx(null);};
 
   return(
     <div className="app">
       {toast&&<div className="toast">{toast}</div>}
       <div className="topbar">
-        <div>
-          <div className="logo">JEJU TRIP</div>
-          <div className="logo-sub">2026.06.02 — 06.06</div>
-          <div className={`sync-badge ${syncStatus==="synced"?"on":"off"}`}>{syncLabel}</div>
+        <div><div className="logo">JEJU TRIP</div><div className="logo-sub">2026.06.02 — 06.06</div>
+          <div className={`sync-badge ${syncStatus==="synced"?"on":"off"}`}>{{synced:"● 실시간 동기화",connecting:"○ 연결 중...",local:"○ 로컬 모드",error:"○ 연결 오류"}[syncStatus]}</div>
         </div>
         <div className="top-btns"><button className="top-btn" onClick={reset}>🗑</button></div>
       </div>
 
       <div className="days">
         {DAYS.map(d=>{const cnt=all[d.id].filter(s=>s.a).length;return(<button key={d.id} className={`day-tab ${d.id===tab?"active":""}`} onClick={()=>{setTab(d.id);setActiveIdx(null);setEditIdx(null);setMemoEditIdx(null);}}><span className="dt-l">{d.label}</span><span className="dt-d">{d.tab}</span>{cnt>0&&<span className="dt-cnt">{cnt}개</span>}</button>);})}
-        <button className={`day-tab memo-tab ${tab==="memo"?"active":""}`} onClick={()=>{setTab("memo");setActiveIdx(null);setEditIdx(null);setMemoEditIdx(null);}}>
-          <span className="dt-l">WISH</span><span className="dt-d" style={{fontSize:16}}>📋</span>
-          {memo.length>0&&<span className="dt-cnt">{memo.length}개</span>}
-        </button>
+        <button className={`day-tab memo-tab ${tab==="memo"?"active":""}`} onClick={()=>{setTab("memo");setActiveIdx(null);setEditIdx(null);setMemoEditIdx(null);}}><span className="dt-l">WISH</span><span className="dt-d" style={{fontSize:16}}>📋</span>{memo.length>0&&<span className="dt-cnt">{memo.length}개</span>}</button>
       </div>
 
-      {!isMemo&&<div className="map-area"><div className="map-svg-wrap"><NeonMap filledStops={filledStops} activeMapIdx={activeMapIdx} onTapMapStop={onTapMapStop} day={tab}/></div></div>}
+      {!isMemo&&<SatelliteMap filledStops={filledStops} activeMapIdx={activeMapIdx} onTapMapStop={onTapMapStop} day={tab}/>}
 
       {isMemo?(
         <div className="panel" style={{borderColor:"rgba(0,212,255,.15)"}}>
-          <div className="panel-header">
-            <span className="panel-title memo-title">WISHLIST</span>
-            <span className="panel-filled">{memo.length}개</span>
-          </div>
-          <p style={{fontSize:11,color:"rgba(255,255,255,.2)",marginBottom:10,lineHeight:1.6}}>가고 싶은 곳 메모해두세요!<br/>일정 추가할 때 여기서 바로 가져올 수 있어요.</p>
-
+          <div className="panel-header"><span className="panel-title memo-title">WISHLIST</span><span className="panel-filled">{memo.length}개</span></div>
+          <p style={{fontSize:11,color:"rgba(255,255,255,.2)",marginBottom:10,lineHeight:1.6}}>가고 싶은 곳 메모! 일정 추가할 때 가져올 수 있어요.</p>
           {memoEditIdx!==null?(
             <div className="edit-wrap memo-edit">
               <input value={dr.a} onChange={e=>setDr(d=>({...d,a:e.target.value}))} placeholder="장소/활동 (예: 🍖 흑돼지 맛집)" autoFocus onKeyDown={e=>e.key==="Enter"&&saveMemo()}/>
@@ -292,56 +315,27 @@ function App(){
               <input className="edit-note" value={dr.n} onChange={e=>setDr(d=>({...d,n:e.target.value}))} placeholder="메모 (선택)" onKeyDown={e=>e.key==="Enter"&&saveMemo()}/>
               <div className="edit-btns"><button className="btn-sv memo-sv" onClick={saveMemo}>저장</button><button className="btn-cn" onClick={()=>setMemoEditIdx(null)}>취소</button></div>
             </div>
-          ):(
-            <>
-              {memo.map((m,i)=>(
-                <div key={i} className="memo-card" onClick={()=>startMemoEdit(i)}>
-                  <div className="mc-top"><span className="mc-act">{m.a}</span><button className="mc-x" onClick={e=>delMemo(i,e)}>×</button></div>
-                  {m.loc&&<div className="mc-loc">📍 {m.loc}</div>}
-                  {m.d&&(<div className="mc-addr" onClick={e=>e.stopPropagation()}><span>📍</span><span className="sr-addr-txt">{m.d}</span><button className="sr-copy" onClick={e=>cpAddr(m.d,e)}>복사</button></div>)}
-                  {m.n&&<div className="mc-note">{m.n}</div>}
-                </div>
-              ))}
-              <button className="add-memo-btn" onClick={startMemoNew}>+ 가고 싶은 곳 추가</button>
-            </>
-          )}
+          ):(<>{memo.map((m,i)=>(<div key={i} className="memo-card" onClick={()=>startMemoEdit(i)}><div className="mc-top"><span className="mc-act">{m.a}</span><button className="mc-x" onClick={e=>delMemo(i,e)}>×</button></div>{m.loc&&<div className="mc-loc">📍 {m.loc}</div>}{m.d&&(<div className="mc-addr" onClick={e=>e.stopPropagation()}><span>📍</span><span className="sr-addr-txt">{m.d}</span><button className="sr-copy" onClick={e=>cpAddr(m.d,e)}>복사</button></div>)}{m.n&&<div className="mc-note">{m.n}</div>}</div>))}<button className="add-memo-btn" onClick={startMemoNew}>+ 가고 싶은 곳 추가</button></>)}
         </div>
       ):(
         <div className={`panel ${editIdx!==null?"editing":""}`}>
-          <div className="panel-header">
-            <span className="panel-title">SCHEDULE</span>
-            <div style={{display:"flex",gap:8,alignItems:"center"}}><span className="panel-filled">{filledCount}개</span><span className="panel-day">{DAYS.find(d=>d.id===tab)?.date}</span></div>
-          </div>
+          <div className="panel-header"><span className="panel-title">SCHEDULE</span><div style={{display:"flex",gap:8,alignItems:"center"}}><span className="panel-filled">{filledCount}개</span><span className="panel-day">{DAYS.find(d=>d.id===tab)?.date}</span></div></div>
           {editIdx!==null?(
             <div className="edit-wrap">
               <div className="edit-head"><div className="edit-num">{slots.slice(0,editIdx+1).filter(s=>s.a).length||"+"}</div><span className="edit-time">{slots[editIdx].t}</span></div>
-              {memo.length>0&&(
-                <div className="memo-pick">
-                  <div className="memo-pick-title">📋 위시리스트에서 가져오기</div>
-                  <div className="memo-pick-list">{memo.map((m,i)=>(<button key={i} className="memo-pick-chip" onClick={()=>pickMemo(m)}>{m.a}</button>))}</div>
-                </div>
-              )}
+              {memo.length>0&&(<div className="memo-pick"><div className="memo-pick-title">📋 위시리스트에서 가져오기</div><div className="memo-pick-list">{memo.map((m,i)=>(<button key={i} className="memo-pick-chip" onClick={()=>pickMemo(m)}>{m.a}</button>))}</div></div>)}
               <input value={dr.a} onChange={e=>setDr(d=>({...d,a:e.target.value}))} placeholder="일정 (예: 🍖 흑돼지 삼겹살)" autoFocus onKeyDown={e=>e.key==="Enter"&&save()}/>
               <div className="loc-row">{["제주시","애월","함덕","월정리","협재","한림","중문","서귀포","성산","우도","표선","조천"].map(l=>(<button key={l} className={`loc-chip ${dr.loc===l?"sel":""}`} onClick={()=>setDr(d=>({...d,loc:d.loc===l?"":l}))}>{l}</button>))}</div>
               <div className="edit-addr-row"><span>📍</span><input value={dr.d} onChange={e=>setDr(d=>({...d,d:e.target.value}))} placeholder="주소 (네비용)" onKeyDown={e=>e.key==="Enter"&&save()}/></div>
               <input className="edit-note" value={dr.n} onChange={e=>setDr(d=>({...d,n:e.target.value}))} placeholder="메모 (선택)" onKeyDown={e=>e.key==="Enter"&&save()}/>
               <div className="edit-btns"><button className="btn-sv" onClick={save}>저장</button><button className="btn-cn" onClick={()=>setEditIdx(null)}>취소</button></div>
             </div>
-          ):(
-            slots.map((s,i)=>{const filled=!!s.a;const isActive=activeIdx===i;const mapNum=filled?slots.slice(0,i+1).filter(x=>x.a).length:0;return(
-              <div key={i} id={`slot-${i}`} className={`stop-row ${filled?"filled":""} ${isActive?"active-row":""}`} onClick={()=>startEdit(i)}>
-                <span className="sr-time">{s.t}</span>
-                {filled?<div className="sr-dot on">{mapNum}</div>:<div className="sr-dot"/>}
-                <div className="sr-body">
-                  {filled?(<><div className="sr-act">{s.a}</div>
-                    {s.d&&(<div className="sr-addr" onClick={e=>e.stopPropagation()}><span>📍</span><span className="sr-addr-txt">{s.d}</span><button className="sr-copy" onClick={e=>cpAddr(s.d,e)}>복사</button></div>)}
-                    {s.n&&<div className="sr-note">{s.n}</div>}
-                  </>):(<div className="sr-empty">탭하여 추가</div>)}
-                </div>
-                {filled&&<button className="sr-x" onClick={e=>clr(i,e)}>×</button>}
-              </div>
-            );})
-          )}
+          ):(slots.map((s,i)=>{const filled=!!s.a;const isActive=activeIdx===i;const mapNum=filled?slots.slice(0,i+1).filter(x=>x.a).length:0;return(
+            <div key={i} id={`slot-${i}`} className={`stop-row ${filled?"filled":""} ${isActive?"active-row":""}`} onClick={()=>startEdit(i)}>
+              <span className="sr-time">{s.t}</span>{filled?<div className="sr-dot on">{mapNum}</div>:<div className="sr-dot"/>}
+              <div className="sr-body">{filled?(<><div className="sr-act">{s.a}</div>{s.d&&(<div className="sr-addr" onClick={e=>e.stopPropagation()}><span>📍</span><span className="sr-addr-txt">{s.d}</span><button className="sr-copy" onClick={e=>cpAddr(s.d,e)}>복사</button></div>)}{s.n&&<div className="sr-note">{s.n}</div>}</>):(<div className="sr-empty">탭하여 추가</div>)}</div>
+              {filled&&<button className="sr-x" onClick={e=>clr(i,e)}>×</button>}
+            </div>);}))}
         </div>
       )}
     </div>
